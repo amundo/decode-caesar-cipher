@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Cipher Decoder</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'48'%20height%3D'48'%20viewBox%3D'0%200%2016%2016'%3E%3Ctext%20x%3D'0'%20y%3D'14'%3E%F0%9F%94%90%3C%2Ftext%3E%3C%2Fsvg%3E" />
+
+  <link rel="stylesheet" href="cipher.css">
+</head>
+<body>
+<header>
+  <h1>Cipher Decoder</h1>
+  
+  <div class="algorithm-selector">
+    <label><input type="radio" name="algorithm" value="caesar" checked> Caesar Cipher</label>
+    <label><input type="radio" name="algorithm" value="substitution"> Substitution Cipher</label>
+  </div>
+</header>
+
+
+<h2>Plaintext</h2>
+<textarea id="plaintext" placeholder="Type or paste something here…"></textarea>
+<h2>Ciphertext</h2>
+<textarea id="ciphertext" placeholder="Encoded text will appear here…"></textarea>
+<h2>Decoded Text</h2>
+<textarea id="decodedtext" placeholder="Decrypted text will appear here…"></textarea>
+
+<div id="mapping-container">
+  <table id="mapping-table">
+    <thead>
+      <tr id="alphabet-row"></tr>
+    </thead>
+    <tbody>
+      <tr id="mapping-row"></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<script type="module">
+import {englishLetterFrequencies} from './english-letter-frequencies.js'
+import  {
+  initializeMappingTable,
+  updateMappingRow
+} from './mapping-table.js'
+
+import {
+  caesarCipherEncode,
+  statisticalCaesarCipherDecode
+} from './caesar-cipher.js';
+
+import {
+  generateSubstitutionKey,
+  substitutionCipherEncode,
+  substitutionCipherDecode,
+  substitutionCipherStatisticalDecode
+} from './substitution-cipher.js';
+
+let currentAlgorithm = "caesar";
+let substitutionKey = generateSubstitutionKey();
+
+document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    currentAlgorithm = e.target.value;
+    updateUI();
+  });
+});
+
+function updateUI() {
+  const plaintext = document.querySelector('#plaintext').value;
+
+  if (currentAlgorithm === "caesar") {
+    const randomShift = Math.floor(Math.random() * 26);
+    const ciphertext = caesarCipherEncode(plaintext, randomShift);
+    const decoded = statisticalCaesarCipherDecode(ciphertext);
+    document.querySelector('#ciphertext').value = ciphertext;
+    document.querySelector('#decodedtext').value = decoded.decodedText;
+    updateColor(plaintext, decoded.decodedText);
+  } else if (currentAlgorithm === "substitution") {
+    substitutionKey = generateSubstitutionKey(); // Generate a new random key
+    const ciphertext = substitutionCipherEncode(plaintext, substitutionKey);
+    const decoded = substitutionCipherStatisticalDecode(ciphertext, englishLetterFrequencies);
+    document.querySelector('#ciphertext').value = ciphertext;
+    document.querySelector('#decodedtext').value = decoded;
+    updateColor(plaintext, decoded);
+  }
+}
+
+function updateColor(plaintext, decoded) {
+  console.log(plaintext == decoded)
+  document.querySelector('#decodedtext').classList.toggle('correct', decoded == plaintext)
+    document.querySelector('#decodedtext').classList.toggle('incorrect', decoded !== plaintext)
+}
+
+document.querySelector('#plaintext').addEventListener('input', updateUI);
+</script>
+</body>
+</html>
