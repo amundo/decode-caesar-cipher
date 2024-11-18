@@ -21,6 +21,7 @@ function initializeMappingTable() {
 }
 
 function updateMappingRow(mapping) {
+  console.log(JSON.stringify(mapping))
   const mappingRow = document.getElementById("mapping-row");
   const cells = mappingRow.querySelectorAll("td");
 

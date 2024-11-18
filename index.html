@@ -66,6 +66,8 @@ document.querySelectorAll('input[name="algorithm"]').forEach(radio => {
     updateUI();
   });
 });
+// Call initializeMappingTable on page load
+initializeMappingTable();
 
 function updateUI() {
   const plaintext = document.querySelector('#plaintext').value;
@@ -76,6 +78,9 @@ function updateUI() {
     const decoded = statisticalCaesarCipherDecode(ciphertext);
     document.querySelector('#ciphertext').value = ciphertext;
     document.querySelector('#decodedtext').value = decoded.decodedText;
+
+    // No mapping table for Caesar cipher, clear it
+    updateMappingRow({});
     updateColor(plaintext, decoded.decodedText);
   } else if (currentAlgorithm === "substitution") {
     substitutionKey = generateSubstitutionKey(); // Generate a new random key
@@ -83,6 +88,15 @@ function updateUI() {
     const decoded = substitutionCipherStatisticalDecode(ciphertext, englishLetterFrequencies);
     document.querySelector('#ciphertext').value = ciphertext;
     document.querySelector('#decodedtext').value = decoded;
+
+    // Update mapping table
+    const currentMapping = {};
+    "abcdefghijklmnopqrstuvwxyz".split("").forEach((letter, index) => {
+      currentMapping[letter] = substitutionKey[index];
+    })
+    console.log(currentMapping)
+    updateMappingRow(currentMapping);
+
     updateColor(plaintext, decoded);
   }
 }
